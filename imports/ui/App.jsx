@@ -4,10 +4,12 @@ import { Meteor } from 'meteor/meteor';
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { Tasks } from '../api/tasks.js';
+import { Profiles } from '../api/profiles.js';
 
 import Task from './Task.jsx';
 import AccountsUIWrapper from './AccountsUIWrapper.jsx';
- 
+import Welcome from './Welcome.jsx';
+import Profile from './Profile.jsx';
 
 // App component - represents the whole app
 class App extends Component {
@@ -60,7 +62,7 @@ class App extends Component {
       <div className="container">
         <header>
           <h1>Todo List ({this.props.incompleteCount})</h1>
-          
+
           <label className="hide-completed">
             <input
               type="checkbox"
@@ -87,6 +89,12 @@ class App extends Component {
         <ul>
           {this.renderTasks()}
         </ul>
+        
+        <hr/><hr/>
+        
+        { this.props.profile ? 
+            <Profile profile={this.props.profile} /> : <Welcome />
+        }
       </div>
     );
   }
@@ -96,14 +104,21 @@ App.propTypes = {
   tasks: PropTypes.array.isRequired,
   incompleteCount: PropTypes.number.isRequired,
   currentUser: PropTypes.object,
+  profile: PropTypes.object
 };
 
 export default createContainer(() => {
   Meteor.subscribe('tasks');
+  Meteor.subscribe('userprofiles');
+  
+  // console.log('User id:', Meteor.userId())
+  // console.log('Profile count:', Profiles.find({}).count());
+  const user_profile = Profiles.find({}).fetch()[0];
 
   return {
     tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch(),
     incompleteCount: Tasks.find({ checked: { $ne: true } }).count(),
     currentUser: Meteor.user(),
+    profile: user_profile,
   };
 }, App);
