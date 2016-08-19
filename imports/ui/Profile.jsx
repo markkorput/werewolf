@@ -11,6 +11,10 @@ export default class Profile extends Component {
     Meteor.call('profiles.setAlias', this.props.profile._id, alias);
   }
 
+  joinGame() {
+    Meteor.call('profiles.joinPendingGame');
+  }
+
   render() {
     return (
       <div id="profile">
@@ -24,6 +28,9 @@ export default class Profile extends Component {
               />
               <input type="submit" />
         </form>
+        <button id="join-game" onClick={this.joinGame.bind(this)}>
+            Join game
+        </button> 
       </div>
     );
   }
