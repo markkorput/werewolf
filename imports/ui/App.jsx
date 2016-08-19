@@ -5,11 +5,13 @@ import { createContainer } from 'meteor/react-meteor-data';
 
 import { Tasks } from '../api/tasks.js';
 import { Profiles } from '../api/profiles.js';
+import { Games } from '../api/games.js';
 
-import Task from './Task.jsx';
 import AccountsUIWrapper from './AccountsUIWrapper.jsx';
+import Task from './Task.jsx';
 import Welcome from './Welcome.jsx';
 import Profile from './Profile.jsx';
+import Game from './Game.jsx';
 
 // App component - represents the whole app
 class App extends Component {
@@ -57,6 +59,24 @@ class App extends Component {
     });
   }
 
+  renderGame() {
+    if(this.props.game){
+      return(
+        <Game game={this.props.game} profile={this.props.profile} />
+      );
+    }
+    
+    if(this.props.profile){
+      return(
+        <Profile profile={this.props.profile} />
+      );
+    }
+    
+    return (
+      <Welcome />
+    );
+  }
+
   render() {
     return (
       <div className="container">
@@ -91,10 +111,8 @@ class App extends Component {
         </ul>
         
         <hr/><hr/>
-        
-        { this.props.profile ? 
-            <Profile profile={this.props.profile} /> : <Welcome />
-        }
+
+        { this.renderGame() }
       </div>
     );
   }
@@ -104,21 +122,26 @@ App.propTypes = {
   tasks: PropTypes.array.isRequired,
   incompleteCount: PropTypes.number.isRequired,
   currentUser: PropTypes.object,
-  profile: PropTypes.object
+  profile: PropTypes.object,
+  game: PropTypes.object,
 };
 
 export default createContainer(() => {
   Meteor.subscribe('tasks');
   Meteor.subscribe('userprofiles');
-  
+  Meteor.subscribe('usergameprofiles');
+  Meteor.subscribe('pendinggames');
+
   // console.log('User id:', Meteor.userId())
   // console.log('Profile count:', Profiles.find({}).count());
   const user_profile = Profiles.find({}).fetch()[0];
+  const user_game = user_profile && user_profile.game();
 
   return {
     tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch(),
     incompleteCount: Tasks.find({ checked: { $ne: true } }).count(),
     currentUser: Meteor.user(),
     profile: user_profile,
+    game: user_game,
   };
 }, App);
