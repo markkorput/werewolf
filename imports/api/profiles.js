@@ -8,17 +8,13 @@ export const Profiles = new Mongo.Collection('profiles');
 if (Meteor.isServer) {
   // This code only runs on the server
   // Only publish profiles that belong to the current user
-  Meteor.publish('userprofiles', function userProfilesPublication() {
+  Meteor.publish('userprofiles', function () {
     return Profiles.find({ owner: this.userId });
   });
 
-  Meteor.publish('usergameprofiles', function userGameProfilesPublication(){
-    // find user's profile
-    const profile = Profiles.find({owner: this.userId}).fetch()[0];
-    // find the game that the user has joined
-    const game = profile && profile.game()
-    // show all profiles that have joined the same game
-    return game && game.profiles();
+  Meteor.publish('gameprofiles', function (game_id){
+    check(game_id, String);
+    return Profiles.find({ game_id: game_id })
   });
 }
 

@@ -81,36 +81,8 @@ class App extends Component {
     return (
       <div className="container">
         <header>
-          <h1>Todo List ({this.props.incompleteCount})</h1>
-
-          <label className="hide-completed">
-            <input
-              type="checkbox"
-              readOnly
-              checked={this.state.hideCompleted}
-              onClick={this.toggleHideCompleted.bind(this)}
-            />
-            Hide Completed Tasks
-          </label>
-
           <AccountsUIWrapper />
-
-          { this.props.currentUser ?
-            <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
-              <input
-                type="text"
-                ref="textInput"
-                placeholder="Type to add new tasks"
-              />
-            </form> : ''
-          }
         </header>
-
-        <ul>
-          {this.renderTasks()}
-        </ul>
-        
-        <hr/><hr/>
 
         { this.renderGame() }
       </div>
@@ -128,14 +100,18 @@ App.propTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('tasks');
+  
   Meteor.subscribe('userprofiles');
-  Meteor.subscribe('usergameprofiles');
-  Meteor.subscribe('pendinggames');
-
   // console.log('User id:', Meteor.userId())
   // console.log('Profile count:', Profiles.find({}).count());
   const user_profile = Profiles.find({}).fetch()[0];
+  
+  Meteor.subscribe('pendinggames');
   const user_game = user_profile && user_profile.game();
+
+  if(user_game){
+    Meteor.subscribe('gameprofiles', user_game._id);
+  }
 
   return {
     tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch(),
